@@ -8,42 +8,51 @@
 ##
 ## Write a short comment describing this function
 ## To comppute the inverse of a matrix, it must be square and its determinant is different of zero.
-## a) Make sure that x is a matrix, and it is of the square type.
-## b) Make sure that x is a inverse matrix (determinant different of zero).
-## c) Create a "matrix" object that can cache its inverse.
-
-makeCacheMatrix <- function(x = matrix()) {
-  if(!is.matrix(x)) stop("x must be a matrix")
-  if(nrow(x) != ncol(x)) stop("x is not a square matrix.")
-  if(det(x) == 0) stop("x doesn't have inverse; its determinant is zero")
+## a) A "matrix object" is bult through four functions: set, get, setinv, and getinv.
+## b) x and inv are defined in a parent environment using the set function
+## c) set and get allow to cache and retrieve the values for the given matrix.
+## d) setinv and getinv allows to cache and retrieve the values for the inverse matrix.
   
-  inv0 <- NULL
+makeCacheMatrix <- function(x = matrix()){
+  
+  inv <- NULL
+  
   set <- function(y){
     x <<- y
-    inv0 <<- NULL
+    inv <<- NULL
   }
+  
   get <- function() x    
-  setmean <- function(inv) inv0 <<- inv 
-  getmean <- function() inv0
-  list(set = set, get = get, setmean = setmean, getmean = getmean)  
-
+  setinv <- function(inv) inv <<- inv 
+  getinv <- function() inv
+  list(set = set, get = get, setinv = setinv, getinv = getinv)
+  
 }
 
 ## Write a short comment describing this function
-## d) If the inverse has been calculated (inv0 != 0) and the matrix has not changed (x = x0),
-##    the cacheSolve return the inverse from the cache (inv0).
-## e) If the inverse has not been calculated (inv0 = NULL) or the matrix has changed (x != x0)
-##    the cacheSolve computes the inverse (solve(x)%*%x), caches and returns the inverse (inv)
-
-cacheSolve <- function(x, ...) {
-        ## Return a matrix that is the inverse of 'x'
-  inv <- x$getmean()
-  if ((!is.null(inv)) & (x$set == x$get)) {    
+## e) To determine the time execution, it is used a timing script (time_duration).
+## d) Second, it is determined if the value is NULL or not. If it is null, the inverse of the matrix
+##    is computed; conversely, the inv is returned. 
+  
+cacheSolve <- function(x, ...){
+  
+  start_time <- Sys.time()
+  inv <- x$getinv()
+  
+  if (!is.null(inv)) {
     message("getting cached data")
+    end_time <- Sys.time()
+    time_duration <- end_time - start_time
+    print(time_duration)
     return(inv)
-  } 
-  data <- x$get()
-  inv <- solve(data)%*%data(data, ...)
-  x$setmean(inv)
-  inv
+  } else {
+    message("computing data")
+    data <- x$get()
+    inv <- solve(data)%*%data
+    x$setinv(inv)
+    end_time <- Sys.time()
+    time_duration <- end_time - start_time
+    print(time_duration)
+    return(inv)
+  }
 }
